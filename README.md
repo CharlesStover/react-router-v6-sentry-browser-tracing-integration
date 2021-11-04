@@ -17,6 +17,7 @@ Easy React Router v6 instrumentation for Sentry
 ```javascript
 import { init } from '@sentry/react';
 import { render } from 'react-dom';
+import { BrowserRouter } from 'react-router';
 import useBrowserTracing from 'react-router-v6-instrumentation';
 
 function App() {
