@@ -1,6 +1,6 @@
 {
   "name": "react-router-v6-instrumentation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Charles Stover <react-router-v6-instrumentation@charlesstover.com>",
   "description": "Sentry browser tracing integration for React Router v6",
   "homepage": "https://www.npmjs.com/package/react-router-v6-instrumentation",
