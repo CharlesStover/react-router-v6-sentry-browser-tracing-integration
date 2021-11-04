@@ -70,9 +70,7 @@ jobs:
         with:
           if-no-files-found: error
           name: rollup
-          path: |
-            dist
-            types
+          path: dist
 
   publish:
     needs: [eslint, jest, rollup]

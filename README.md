@@ -1,28 +1,48 @@
-# Node package
+# Sentry browser tracing integration for React Router v6
 
-[![version](https://img.shields.io/npm/v/PACKAGE-NAME.svg)](https://www.npmjs.com/package/PACKAGE-NAME)
-[![minzipped size](https://img.shields.io/bundlephobia/minzip/PACKAGE-NAME.svg)](https://www.npmjs.com/package/PACKAGE-NAME)
-[![downloads](https://img.shields.io/npm/dt/PACKAGE-NAME.svg)](https://www.npmjs.com/package/PACKAGE-NAME)
-[![GitHub Action: Push](https://github.com/CharlesStover/PACKAGE-NAME/actions/workflows/push.yml/badge.svg)](https://github.com/CharlesStover/PACKAGE-NAME/actions/workflows/push.yml)
+[![version](https://img.shields.io/npm/v/react-router-v6-instrumentation.svg)](https://www.npmjs.com/package/react-router-v6-instrumentation)
+[![minzipped size](https://img.shields.io/bundlephobia/minzip/react-router-v6-instrumentation.svg)](https://www.npmjs.com/package/react-router-v6-instrumentation)
+[![downloads](https://img.shields.io/npm/dt/react-router-v6-instrumentation.svg)](https://www.npmjs.com/package/react-router-v6-instrumentation)
+[![GitHub Action: Push](https://github.com/CharlesStover/react-router-v6-instrumentation/actions/workflows/push.yml/badge.svg)](https://github.com/CharlesStover/react-router-v6-instrumentation/actions/workflows/push.yml)
 
-Description
+Easy React Router v6 instrumentation for Sentry
 
 ## Install
 
-- `npm install package-name` or
-- `yarn add package-name`
+- `npm install react-router-v6-instrumentation` or
+- `yarn add react-router-v6-instrumentation`
 
 ## Use
 
 ```javascript
-import packageName from 'package-name';
+import { init } from '@sentry/react';
+import { render } from 'react-dom';
+import useBrowserTracing from 'react-router-v6-instrumentation';
 
-packageName();
+function App() {
+  const browserTracing = useBrowserTracing();
+
+  // Initialize Sentry with the browser tracing integration.
+  useEffect(() => {
+    init({
+      integrations: [browserTracing],
+    });
+  }, [browserTracing]);
+
+  return <>Hello world!</>;
+}
+
+render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
+  document.getElementById('root'),
+);
 ```
 
-## API
-
-API
+**Note:** For the `useBrowserTracing` hook to work, it must be called from a
+component that is nested inside your `BrowserRouter` (or `MemoryRouter`)
+component.
 
 ## Contributing
 
@@ -36,7 +56,7 @@ To contribute to this repository, start by running the following commands.
 To test your changes for validity, use the following scripts:
 
 - To build your changes, run `yarn rollup`.
-- To build your changes in watch mode, run `yarn rollup-watch`.
+- To build your changes in watch mode, run `yarn rollup:watch`.
 - To lint your changes, run `yarn eslint`.
 - To unit test your changes, run `yarn jest`.
-- To unit test your changes in watch mode, run `yarn jest-watch`.
+- To unit test your changes in watch mode, run `yarn jest:watch`.
