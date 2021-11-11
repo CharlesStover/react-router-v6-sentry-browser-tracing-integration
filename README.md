@@ -3,7 +3,7 @@
 [![version](https://img.shields.io/npm/v/react-router-v6-instrumentation.svg)](https://www.npmjs.com/package/react-router-v6-instrumentation)
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/react-router-v6-instrumentation.svg)](https://www.npmjs.com/package/react-router-v6-instrumentation)
 [![downloads](https://img.shields.io/npm/dt/react-router-v6-instrumentation.svg)](https://www.npmjs.com/package/react-router-v6-instrumentation)
-[![GitHub Action: Push](https://github.com/CharlesStover/react-router-v6-instrumentation/actions/workflows/push.yml/badge.svg)](https://github.com/CharlesStover/react-router-v6-instrumentation/actions/workflows/push.yml)
+[![GitHub Action: Push](https://github.com/CharlesStover/react-router-v6-sentry-browser-tracing-integration/actions/workflows/push.yml/badge.svg)](https://github.com/CharlesStover/react-router-v6-sentry-browser-tracing-integration/actions/workflows/push.yml)
 
 Easy React Router v6 instrumentation for Sentry
 
