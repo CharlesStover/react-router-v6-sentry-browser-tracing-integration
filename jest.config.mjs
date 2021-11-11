@@ -12,6 +12,7 @@ export default {
     '<rootDir>/src/**/*.{ts,tsx}',
     '!<rootDir>/src/**/*.d.ts',
     '!<rootDir>/src/**/*.test.{ts,tsx}',
+    '!<rootDir>/src/test/**/*',
   ],
   coverageThreshold: {
     global: {
