@@ -18,17 +18,19 @@ Easy React Router v6 instrumentation for Sentry
 import { init } from '@sentry/react';
 import { render } from 'react-dom';
 import { BrowserRouter } from 'react-router';
-import useBrowserTracing from 'react-router-v6-instrumentation';
+import useRoutingInstrumentation from 'react-router-v6-instrumentation';
 
 function App() {
-  const browserTracing = useBrowserTracing();
-
   // Initialize Sentry with the browser tracing integration.
+  const routingInstrumentation = useRoutingInstrumentation();
   useEffect(() => {
+    const browserTracing = new BrowserTracing({
+      routingInstrumentation,
+    });
     init({
       integrations: [browserTracing],
     });
-  }, [browserTracing]);
+  }, [routingInstrumentation]);
 
   return <>Hello world!</>;
 }
@@ -41,8 +43,8 @@ render(
 );
 ```
 
-**Note:** For the `useBrowserTracing` hook to work, it must be called from a
-component that is nested inside your `BrowserRouter` (or `MemoryRouter`)
+**Note:** For the `useRoutingInstrumentation` hook to work, it must be called
+from a component that is nested inside your `BrowserRouter` (or `MemoryRouter`)
 component.
 
 ## Contributing

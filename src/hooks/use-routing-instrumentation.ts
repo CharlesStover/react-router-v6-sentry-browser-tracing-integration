@@ -1,55 +1,52 @@
 import type { ReactRouterInstrumentation } from '@sentry/react/dist/types';
-import { Integrations } from '@sentry/tracing';
-import type {
-  Integration,
-  Transaction,
-  TransactionContext,
-} from '@sentry/types';
+import type { Transaction, TransactionContext } from '@sentry/types';
 import type { MutableRefObject } from 'react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { Location, NavigationType } from 'react-router';
 import { useLocation, useNavigationType } from 'react-router';
 import TAGS from '../constants/tags';
 
-export default function useReactRouterV6SentryBrowserTracingIntegration(): Integration {
+export default function useRoutingInstrumentation(): ReactRouterInstrumentation {
   // Contexts
-  const location: Location = useLocation();
+  const { pathname }: Location = useLocation();
   const navigationType: NavigationType = useNavigationType();
 
   // States
   const activeTransaction: MutableRefObject<Transaction | undefined> = useRef();
+  const pathnameRef: MutableRefObject<string> = useRef(pathname);
   const customStartTransaction: MutableRefObject<
     | ((context: Readonly<TransactionContext>) => Transaction | undefined)
     | undefined
   > = useRef();
-  const pathname: MutableRefObject<string> = useRef(location.pathname);
   const startTransactionOnLocationChange: MutableRefObject<boolean> =
     useRef(true);
 
   // Effects
-  useEffect((): void => {
-    pathname.current = location.pathname;
-  }, [location.pathname]);
-
+  const isIgnoredNavigationType: boolean =
+    navigationType !== 'POP' && navigationType !== 'PUSH';
   useEffect((): void => {
     if (
       typeof customStartTransaction.current !== 'function' ||
       !startTransactionOnLocationChange.current ||
-      (navigationType !== 'POP' && navigationType !== 'PUSH')
+      isIgnoredNavigationType
     ) {
       return;
     }
 
+    // The active transaction needs to be finished prior to starting a new one,
+    //   instead of as a cleanup step, because the `pageload` transaction may
+    //   still be in flight.
+    // This requires that the `navigation` transaction be finished on unmount.
     if (activeTransaction.current) {
       activeTransaction.current.finish();
     }
 
     activeTransaction.current = customStartTransaction.current({
-      name: location.pathname,
+      name: pathname,
       op: 'navigation',
       tags: TAGS,
     });
-  }, [location.pathname, navigationType]);
+  }, [isIgnoredNavigationType, pathname]);
 
   useEffect((): VoidFunction => {
     // Finish the active transaction on unmount.
@@ -61,40 +58,32 @@ export default function useReactRouterV6SentryBrowserTracingIntegration(): Integ
     };
   }, []);
 
-  return useMemo((): Integration => {
-    const routingInstrumentation: ReactRouterInstrumentation = (
+  // Reference the current pathname via a `MutableRefObject` so that the
+  //   `routingInstrumentation` function does not change reference each time the
+  //   `location` object or `pathname` string change.
+  pathnameRef.current = pathname;
+  return useCallback(
+    (
       newCustomStartTransaction: (
         context: Readonly<TransactionContext>,
       ) => Transaction | undefined,
-      startTransactionOnPageLoad,
-      newStartTransactionOnLocationChange,
+      startTransactionOnPageLoad = true,
+      newStartTransactionOnLocationChange = true,
     ): void => {
       customStartTransaction.current = newCustomStartTransaction;
-
-      // This default value is defined by `@sentry/react`. Triggering it is not
-      //   within the scope of this package.
-      // https://github.com/getsentry/sentry-javascript/blob/ac20799d841f57b3d64afc55f5331ab093c1c3c3/packages/react/src/reactrouter.tsx#L83
-      // istanbul ignore next
       startTransactionOnLocationChange.current =
-        newStartTransactionOnLocationChange ?? true;
+        newStartTransactionOnLocationChange;
 
-      // This default value and branch are defined by `@sentry/react`.
-      //   Triggering them  is not within the scope of this package.
-      // https://github.com/getsentry/sentry-javascript/blob/ac20799d841f57b3d64afc55f5331ab093c1c3c3/packages/react/src/reactrouter.tsx#L85
-      // istanbul ignore if
-      if (startTransactionOnPageLoad === false || pathname.current === '') {
+      if (!startTransactionOnPageLoad) {
         return;
       }
 
       activeTransaction.current = newCustomStartTransaction({
-        name: pathname.current,
+        name: pathnameRef.current,
         op: 'pageload',
         tags: TAGS,
       });
-    };
-
-    return new Integrations.BrowserTracing({
-      routingInstrumentation,
-    });
-  }, []);
+    },
+    [],
+  );
 }

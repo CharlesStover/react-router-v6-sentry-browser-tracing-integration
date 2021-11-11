@@ -50,6 +50,7 @@
     "/dist/",
     "/jest/",
     "/node_modules/",
+    "/src/test/*.ts",
     "**/*.test.ts",
     "**/*.test.tsx"
   ]
