@@ -1,11 +1,12 @@
-import { act } from '@testing-library/react-hooks';
 import TAGS from '../constants/tags';
-import renderRoutingInstrumentation from '../test/utils/render-routing-instrumentation';
 import TEST_CUSTOM_START_TRANSACTION from '../test/utils/test-custom-start-transaction';
 import TEST_FINISH from '../test/utils/test-finish';
+import { act } from '@testing-library/react-hooks';
+import renderRoutingInstrumentation from '../test/utils/render-routing-instrumentation';
 
 const ONCE = 1;
 const TEST_PATHNAME = '/test/pathname';
+const TEST_PATHNAME_PARAMETERIZED = '/test/:pathname';
 
 describe('useRoutingInstrumentation', (): void => {
   it('should ignore navigation before initializing', (): void => {
@@ -125,6 +126,31 @@ describe('useRoutingInstrumentation', (): void => {
       expect(TEST_CUSTOM_START_TRANSACTION).toHaveBeenLastCalledWith({
         name: TEST_PATHNAME,
         op: 'pageload',
+        tags: TAGS,
+      });
+    });
+  });
+
+  describe('parameterizedPaths', (): void => {
+    it('should set parameterized transaction name on navigation', (): void => {
+      const { navigate, routingInstrumentation } = renderRoutingInstrumentation(
+        {
+          parameterizedPaths: [TEST_PATHNAME_PARAMETERIZED],
+        },
+      );
+
+      act((): void => {
+        routingInstrumentation(TEST_CUSTOM_START_TRANSACTION, false, true);
+      });
+
+      act((): void => {
+        navigate(TEST_PATHNAME);
+      });
+
+      expect(TEST_CUSTOM_START_TRANSACTION).toHaveBeenCalledTimes(ONCE);
+      expect(TEST_CUSTOM_START_TRANSACTION).toHaveBeenLastCalledWith({
+        name: TEST_PATHNAME_PARAMETERIZED,
+        op: 'navigation',
         tags: TAGS,
       });
     });
