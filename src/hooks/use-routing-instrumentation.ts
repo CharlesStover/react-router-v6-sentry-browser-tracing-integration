@@ -1,12 +1,39 @@
-import type { ReactRouterInstrumentation } from '@sentry/react/dist/types';
-import type { Transaction, TransactionContext } from '@sentry/types';
-import type { MutableRefObject } from 'react';
-import { useCallback, useEffect, useRef } from 'react';
 import type { Location, NavigationType } from 'react-router';
+import { RouteObject, matchRoutes } from 'react-router-dom';
+import type { Transaction, TransactionContext } from '@sentry/types';
+import { useCallback, useEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router';
+
+import type { MutableRefObject } from 'react';
+import type { ReactRouterInstrumentation } from '@sentry/react/dist/types';
 import TAGS from '../constants/tags';
 
-export default function useRoutingInstrumentation(): ReactRouterInstrumentation {
+export interface RoutingInstrumentationOptions {
+  parameterizedPaths?: string[];
+}
+
+// Extract the route matching the current pathname
+const getMatchedRoutePath = (
+  routes: RouteObject[],
+  toPathname: string,
+): string | undefined => {
+  const matchedRoutes = matchRoutes(routes, toPathname);
+  if (!!matchedRoutes && matchedRoutes.length > 0) {
+    return matchedRoutes[0].route?.path;
+  }
+  return undefined;
+};
+
+export default function useRoutingInstrumentation(
+  options?: RoutingInstrumentationOptions,
+): ReactRouterInstrumentation {
+  // Settings
+  const { parameterizedPaths = [] } = options || {};
+  const routes = parameterizedPaths.map(path => {
+    return {
+      path,
+    } as RouteObject;
+  });
   // Contexts
   const { pathname }: Location = useLocation();
   const navigationType: NavigationType = useNavigationType();
@@ -42,11 +69,14 @@ export default function useRoutingInstrumentation(): ReactRouterInstrumentation 
     }
 
     activeTransaction.current = customStartTransaction.current({
-      name: pathname,
+      name:
+        routes.length > 0
+          ? getMatchedRoutePath(routes, pathname) || pathname
+          : pathname,
       op: 'navigation',
       tags: TAGS,
     });
-  }, [isIgnoredNavigationType, pathname]);
+  }, [isIgnoredNavigationType, pathname, routes, getMatchedRoutePath]);
 
   useEffect((): VoidFunction => {
     // Finish the active transaction on unmount.
