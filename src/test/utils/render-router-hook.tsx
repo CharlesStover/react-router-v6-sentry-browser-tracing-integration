@@ -7,10 +7,11 @@ import type RenderRouterHookResult from '../types/render-router-hook-result';
 
 export default function renderRouterHook<Props, State>(
   useHook: (props: Props) => State,
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
   {
     initialEntries = ['/'],
     ...hookOptions
-  }: RenderRouterHookOptions<Props> | undefined = {},
+  }: Readonly<RenderRouterHookOptions<Readonly<Props>>> | undefined = {},
 ): RenderRouterHookResult<Props, State> {
   const navigateRef: MutableRefObject<NavigateFunction> = {
     current(): void {
@@ -25,12 +26,12 @@ export default function renderRouterHook<Props, State>(
 
   function navigate(delta: number): void;
   function navigate(
-    to: To,
-    navigateOptions?: NavigateOptions | undefined,
+    to: Readonly<To>,
+    navigateOptions?: Readonly<NavigateOptions> | undefined,
   ): void;
   function navigate(
-    to: To | number,
-    navigateOptions?: NavigateOptions | undefined,
+    to: Readonly<To> | number,
+    navigateOptions?: Readonly<NavigateOptions> | undefined,
   ): void {
     if (typeof to === 'number') {
       navigateRef.current(to);
@@ -43,9 +44,10 @@ export default function renderRouterHook<Props, State>(
     navigate,
     ...renderHook(useHook, {
       ...hookOptions,
-      wrapper({
-        children,
-      }: Readonly<PropsWithChildren<unknown>>): ReactElement {
+      wrapper(
+        // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+        { children }: Readonly<PropsWithChildren<unknown>>,
+      ): ReactElement {
         return (
           <MemoryRouter initialEntries={initialEntries}>
             <Init />

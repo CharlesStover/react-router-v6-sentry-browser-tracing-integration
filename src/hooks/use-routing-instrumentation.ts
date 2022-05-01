@@ -15,6 +15,7 @@ export default function useRoutingInstrumentation(): ReactRouterInstrumentation 
   const activeTransaction: MutableRefObject<Transaction | undefined> = useRef();
   const pathnameRef: MutableRefObject<string> = useRef(pathname);
   const customStartTransaction: MutableRefObject<
+    // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
     | ((context: Readonly<TransactionContext>) => Transaction | undefined)
     | undefined
   > = useRef();
@@ -65,6 +66,7 @@ export default function useRoutingInstrumentation(): ReactRouterInstrumentation 
   return useCallback(
     (
       newCustomStartTransaction: (
+        // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
         context: Readonly<TransactionContext>,
       ) => Transaction | undefined,
       startTransactionOnPageLoad = true,

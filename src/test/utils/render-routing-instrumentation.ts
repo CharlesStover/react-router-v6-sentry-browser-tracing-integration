@@ -12,7 +12,7 @@ interface RoutingInstrumentationResult {
 }
 
 export default function renderRoutingInstrumentation(
-  initialEntry?: To | undefined,
+  initialEntry?: Readonly<To> | undefined,
 ): RoutingInstrumentationResult {
   const { navigate, result, unmount } = renderRouterHook(
     useRoutingInstrumentation,
@@ -27,6 +27,7 @@ export default function renderRoutingInstrumentation(
 
     routingInstrumentation(
       startTransaction: (
+        // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
         context: Readonly<TransactionContext>,
       ) => Transaction | undefined,
       startTransactionOnPageLoad?: boolean | undefined,
